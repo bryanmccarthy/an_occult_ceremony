@@ -20,6 +20,10 @@ impl ParticlesEditor {
         Self { emitter, coords }
     }
 
+    fn update(&mut self) {
+        self.coords = vec2(screen_width() / 2.0, screen_height() / 2.0);
+    }
+
     fn draw_emitter(&mut self) {
         self.emitter.draw(self.coords);
     }
@@ -45,6 +49,8 @@ async fn main() {
         }
 
         editor.draw_emitter();
+
+        editor.update();
         next_frame().await
     }
 }
