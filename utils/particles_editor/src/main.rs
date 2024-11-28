@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use macroquad::ui::{self as ui};
+use macroquad::ui::{self as ui, hash};
 use macroquad_particles::{self as particles};
 
 mod presets;
@@ -20,7 +20,7 @@ impl ParticlesEditor {
         Self { emitter, coords }
     }
 
-    fn update(&mut self) {
+    fn update_coords(&mut self) {
         self.coords = vec2(screen_width() / 2.0, screen_height() / 2.0);
     }
 
@@ -29,28 +29,62 @@ impl ParticlesEditor {
     }
 }
 
+struct WindowResizeDetector {
+    last_size: Vec2,
+}
+
+impl WindowResizeDetector {
+    fn new() -> Self {
+        Self {
+            last_size: vec2(screen_width(), screen_height()),
+        }
+    }
+
+    fn update(&mut self) {
+        self.last_size = vec2(screen_width(), screen_height());
+    }
+
+    fn has_resized(&self) -> bool {
+        screen_width() != self.last_size.x || screen_height() != self.last_size.y
+    }
+}
+
 #[macroquad::main("particle editor")]
 async fn main() {
     let mut editor = ParticlesEditor::new();
+    let mut resizer_detector = WindowResizeDetector::new();
 
     loop {
         clear_background(BLACK);
 
-        if ui::root_ui().button(None, "Smoke") {
-            editor.emitter.config = presets::smoke();
+        if resizer_detector.has_resized() {
+            resizer_detector.update();
+            editor.update_coords();
         }
 
-        if ui::root_ui().button(None, "Fire") {
-            editor.emitter.config = presets::fire();
-        }
+        ui::widgets::Window::new(hash!(), vec2(10.0, 10.0), vec2(120.0, 200.0))
+            .label("Presets")
+            .ui(&mut ui::root_ui(), |ui| {
+                if ui.button(None, "Default") {
+                    editor.emitter.config = presets::default();
+                }
+                if ui.button(None, "Smoke") {
+                    editor.emitter.config = presets::smoke();
+                }
+                if ui.button(None, "Fire") {
+                    editor.emitter.config = presets::fire();
+                }
+                if ui.button(None, "Explosion") {
+                    editor.emitter.config = presets::explosion();
+                }
+            });
 
-        if ui::root_ui().button(None, "Explosion") {
-            editor.emitter.config = presets::explosion();
+        if ui::root_ui().button(None, "Log config") {
+            println!("{:#?}", editor.emitter.config);
         }
 
         editor.draw_emitter();
 
-        editor.update();
         next_frame().await
     }
 }

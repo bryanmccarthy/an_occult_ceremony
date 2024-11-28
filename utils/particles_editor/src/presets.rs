@@ -1,6 +1,12 @@
 use macroquad::prelude::*;
 use macroquad_particles::{self as particles};
 
+pub fn default() -> particles::EmitterConfig {
+    particles::EmitterConfig {
+        ..Default::default()
+    }
+}
+
 pub fn smoke() -> particles::EmitterConfig {
     particles::EmitterConfig {
         lifetime: 0.8,
