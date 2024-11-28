@@ -49,7 +49,16 @@ impl WindowResizeDetector {
     }
 }
 
-#[macroquad::main("particle editor")]
+fn conf() -> Conf {
+    Conf {
+        window_title: "Particle Editor".to_owned(),
+        window_width: 800,
+        window_height: 600,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(conf)]
 async fn main() {
     let mut editor = ParticlesEditor::new();
     let mut resizer_detector = WindowResizeDetector::new();
